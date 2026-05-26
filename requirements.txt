@@ -1,6 +1,4 @@
-torch
-torchaudio
-transformers
+streamlit
 tensorflow
 numpy
 pandas
@@ -9,5 +7,5 @@ seaborn
 scikit-learn
 librosa
 soundfile
-nltk
-jupyter
+transformers
+torch

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Recognition System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .card h2 span {
+            margin-right: 10px;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            background: #f8f9ff;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            resize: vertical;
+            margin-bottom: 15px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #f8f9ff, #e8ecff);
+            display: none;
+            text-align: center;
+        }
+
+        .result .emoji {
+            font-size: 4em;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .result .emotion {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            text-transform: uppercase;
+        }
+
+        .result .confidence {
+            font-size: 1.1em;
+            color: #667eea;
+            margin-top: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            display: none;
+            margin-top: 15px;
+            font-size: 1.1em;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .results-table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .results-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .results-table tr:hover {
+            background: #f8f9ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 Emotion Recognition System</h1>
+        <p class="subtitle">Detect emotions from Speech, Text or Both!</p>
+
+        <!-- SPEECH CARD -->
+        <div class="card">
+            <h2><span>🎤</span>Speech Emotion Recognition</h2>
+            <input type="file" id="speechFile" accept=".wav">
+            <br>
+            <button onclick="predictSpeech()">Detect Emotion from Speech</button>
+            <div class="loading" id="speechLoading">⏳ Analyzing speech...</div>
+            <div class="result" id="speechResult">
+                <span class="emoji" id="speechEmoji"></span>
+                <div class="emotion" id="speechEmotion"></div>
+                <div class="confidence" id="speechConfidence"></div>
+            </div>
+        </div>
+
+        <!-- TEXT CARD -->
+        <div class="card">
+            <h2><span>📝</span>Text Emotion Recognition</h2>
+            <textarea id="textInput" rows="3" 
+                placeholder="Type something like: I am feeling very happy today!"></textarea>
+            <button onclick="predictText()">Detect Emotion from Text</button>
+            <div class="loading" id="textLoading">⏳ Analyzing text...</div>
+            <div class="result" id="textResult">
+                <span class="emoji" id="textEmoji"></span>
+                <div class="emotion" id="textEmotion"></div>
+                <div class="confidence" id="textConfidence"></div>
+            </div>
+        </div>
+
+        <!-- FUSION CARD -->
+        <div class="card">
+            <h2><span>🔀</span>Multimodal Fusion (Speech + Text)</h2>
+            <input type="file" id="fusionFile" accept=".wav">
+            <textarea id="fusionText" rows="3" 
+                placeholder="Type text that matches your audio..."></textarea>
+            <button onclick="predictFusion()">Detect Emotion (Fusion)</button>
+            <div class="loading" id="fusionLoading">⏳ Analyzing both...</div>
+            <div class="result" id="fusionResult">
+                <span class="emoji" id="fusionEmoji"></span>
+                <div class="emotion" id="fusionEmotion"></div>
+                <div class="confidence" id="fusionConfidence"></div>
+            </div>
+        </div>
+
+        <!-- RESULTS TABLE -->
+        <div class="card">
+            <h2><span>📊</span>Model Accuracy Results</h2>
+            <table class="results-table">
+                <tr>
+                    <th>Model</th>
+                    <th>Architecture</th>
+                    <th>Accuracy</th>
+                </tr>
+                <tr>
+                    <td>🎤 Speech Only</td>
+                    <td>HuBERT + MLP</td>
+                    <td><strong>99.64%</strong></td>
+                </tr>
+                <tr>
+                    <td>📝 Text Only</td>
+                    <td>BERT + MLP</td>
+                    <td><strong>100.00%</strong></td>
+                </tr>
+                <tr>
+                    <td>🔀 Multimodal</td>
+                    <td>HuBERT + BERT + Fusion</td>
+                    <td><strong>100.00%</strong></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        async function predictSpeech() {
+            const file = document.getElementById('speechFile').files[0];
+            if (!file) { alert('Please select a WAV file!'); return; }
+
+            document.getElementById('speechLoading').style.display = 'block';
+            document.getElementById('speechResult').style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('audio', file);
+
+            const response = await fetch('/predict_speech', {
+                method: 'POST', body: formData
+            });
+            const data = await response.json();
+
+            document.getElementById('speechLoading').style.display = 'none';
+            document.getElementById('speechResult').style.display = 'block';
+            document.getElementById('speechEmoji').textContent = data.emoji;
+            document.getElementById('speechEmotion').textContent = data.emotion;
+            document.getElementById('speechConfidence').textContent = 'Confidence: ' + data.confidence;
+        }
+
+        async function predictText() {
+            const text = document.getElementById('textInput').value;
+            if (!text) { alert('Please type some text!'); return; }
+
+            document.getElementById('textLoading').style.display = 'block';
+            document.getElementById('textResult').style.display = 'none';
+
+            const response = await fetch('/predict_text', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            });
+            const data = await response.json();
+
+            document.getElementById('textLoading').style.display = 'none';
+            document.getElementById('textResult').style.display = 'block';
+            document.getElementById('textEmoji').textContent = data.emoji;
+            document.getElementById('textEmotion').textContent = data.emotion;
+            document.getElementById('textConfidence').textContent = 'Confidence: ' + data.confidence;
+        }
+
+        async function predictFusion() {
+            const file = document.getElementById('fusionFile').files[0];
+            const text = document.getElementById('fusionText').value;
+            if (!file) { alert('Please select a WAV file!'); return; }
+            if (!text) { alert('Please type some text!'); return; }
+
+            document.getElementById('fusionLoading').style.display = 'block';
+            document.getElementById('fusionResult').style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('audio', file);
+            formData.append('text', text);
+
+            const response = await fetch('/predict_fusion', {
+                method: 'POST', body: formData
+            });
+            const data = await response.json();
+
+            document.getElementById('fusionLoading').style.display = 'none';
+            document.getElementById('fusionResult').style.display = 'block';
+            document.getElementById('fusionEmoji').textContent = data.emoji;
+            document.getElementById('fusionEmotion').textContent = data.emotion;
+            document.getElementById('fusionConfidence').textContent = 'Confidence: ' + data.confidence;
+        }
+    </script>
+</body>
+</html>
