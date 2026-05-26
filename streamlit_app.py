@@ -14,6 +14,39 @@ st.set_page_config(
     page_icon="🎭",
     layout="centered"
 )
+# ─── DARK THEME ───────────────────────────────────────────
+st.markdown("""
+    <style>
+        .stApp {
+            background-color: #1a1a2e;
+            color: white;
+        }
+        .stHeader {
+            background-color: #1a1a2e;
+        }
+        h1, h2, h3, p, label {
+            color: white !important;
+        }
+        .stButton > button {
+            background: linear-gradient(135deg, #e94560, #0f3460);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+        }
+        .stFileUploader {
+            background-color: #16213e;
+            border-radius: 10px;
+        }
+        .stTextArea textarea {
+            background-color: #16213e;
+            color: white;
+        }
+        .stSuccess {
+            background-color: #0f3460;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
 st.title("🎭 Emotion Recognition System")
 st.markdown("**Detect emotions from Speech, Text or Both!**")
